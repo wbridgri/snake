@@ -28,12 +28,47 @@ class Game {
 
         this.foodX = 0;
         this.foodY = 0;
+
+        this.score = {
+            currentScore: 0,
+            prevScore: 0,
+            hiScore: 0
+        }
     }
 
+
+    startGame() {
+        this.snake = [
+            { x: 200, y: 200 }, 
+            { x: 190, y: 200 },
+            { x: 180, y: 200 },
+            { x: 170, y: 200 },
+            { x: 160, y: 200 }
+            
+        ]
+
+        this.dx = 10
+        this.dy = 0
+
+        this.speed = 100
+
+
+        this.foodX = 0;
+        this.foodY = 0;
+
+        this.score = {
+            currentScore: 0,
+            prevScore: this.score.prevScore,
+            hiScore: this.score.hiScore
+        }
+        snake.init();
+        snake.generateFood();
+    }
 
     init() {
 
         if(this.hasGameEnded()) {
+            this.setPrevScore();
             return;
         }
 
@@ -172,9 +207,33 @@ class Game {
         // 7 when snake eats food
         const hasEatenFood = snake[0].x === this.foodX && snake[0].y === this.foodY
         if(hasEatenFood) {
+            this.score.currentScore += 10;
+            this.setScores();
+            this.speed -= 5;
+            const displayScore = document.getElementById('score');
+            displayScore.innerText = this.score.currentScore
             this.generateFood();
         }else {
             snake.pop()
+        }
+    }
+
+    setScores() {
+        const hiScoreDisplay = document.getElementById('hiScore');
+
+        if(this.score.currentScore > this.score.hiScore) {
+            this.score.hiScore = this.score.currentScore;
+        }
+
+        hiScoreDisplay.innerText = this.score.hiScore;
+    }
+
+    setPrevScore() {
+        const prevScoreDisplay = document.getElementById('prevScore')
+
+        if(this.hasGameEnded()) {
+            this.score.prevScore = this.score.currentScore
+            prevScoreDisplay.innerText = this.score.prevScore;
         }
     }
 
@@ -183,8 +242,17 @@ class Game {
 
 const snake = new Game() 
 
+const gameBtn = document.getElementById('gameBtn')
+
+gameBtn.addEventListener('click', ()=> {
+    snake.startGame()
+    
+})
+
 snake.init()
 
 document.addEventListener('keydown', ()=> {
     snake.changeDirection(event)
 })
+
+snake.generateFood()
